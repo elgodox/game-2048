@@ -4,7 +4,7 @@ A dark-mode 2048 web client for phone and desktop. It installs as a PWA, resumes
 
 The UI defaults to **Spanish**. Switch to English with the ES / EN control on the board.
 
-**Live demo:** [game-2048.vercel.app](https://game-2048.vercel.app)
+**Live demo:** [elgodox-2048.vercel.app](https://elgodox-2048.vercel.app)
 
 ## Features
 
