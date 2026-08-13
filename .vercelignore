@@ -1,0 +1,7 @@
+.env
+.env.*
+.vercel
+node_modules
+preview-*.png
+generate_icons.py
+Iniciar 2048.bat

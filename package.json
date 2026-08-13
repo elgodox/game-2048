@@ -1,0 +1,7 @@
+{
+  "name": "juego-2048",
+  "private": true,
+  "dependencies": {
+    "@vercel/blob": "^2.3.1"
+  }
+}
