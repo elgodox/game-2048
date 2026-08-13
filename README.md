@@ -1,76 +1,81 @@
 # 2048
 
-Cliente web del clásico 2048, pensado para celular y escritorio. Es una PWA en modo oscuro: se puede instalar en el iPhone, guarda la partida si se cierra a mitad y publica un ranking compartido con los diez mejores puntajes.
+A dark-mode 2048 web client for phone and desktop. It installs as a PWA, resumes unfinished games, and keeps a shared top-10 leaderboard with player names.
 
-**Demo:** [juego-2048.vercel.app](https://juego-2048.vercel.app)
+The UI defaults to **Spanish**. Switch to English with the ES / EN control on the board.
 
-## Características
+**Live demo:** [game-2048.vercel.app](https://game-2048.vercel.app)
 
-- Tablero 4×4 con las reglas originales (fusión, spawn 2/4, victoria en 2048 y partida continua)
-- Controles táctiles, teclado (flechas y WASD) y deshacer
-- Puntaje actual, mejor marca local y animaciones de movimiento / fusión
-- Ranking online de 10 entradas, con nombre del jugador
-- Reanudación automática: el tablero se persiste en el dispositivo al salir
-- Instalable como app (manifest, service worker, iconos Apple)
-- Tema oscuro por defecto, con opción clara
+## Features
 
-## Cómo jugar
+- Classic 4×4 rules (merge, 2/4 spawn, win at 2048, continue afterward)
+- Touch, keyboard (arrows / WASD), and undo
+- Current score, local best, and slide / merge animations
+- Shared top-10 leaderboard with a player name
+- Automatic resume if you close mid-game
+- Installable app (manifest, service worker, Apple icons)
+- Dark theme by default, optional light theme
+- Spanish and English
 
-Deslizá el tablero o usá las flechas. Las fichas del mismo valor se combinan en una del doble. El objetivo es formar la ficha **2048**; después se puede seguir por 4096, 8192, etc.
+## How to play
 
-Al terminar una partida se pide un nombre (hasta 16 caracteres) y, si entra en el top 10, queda en el ranking compartido.
+Swipe the board or use the arrow keys. Equal tiles merge into one tile with double the value. Reach **2048**, then keep going for 4096, 8192, and beyond.
 
-## Instalar en el iPhone
+When a run ends you can enter a name (up to 16 characters). If the score makes the top 10, it is stored on the shared leaderboard.
 
-1. Abrir la demo en **Safari** (no Chrome).
-2. Compartir → **Agregar a inicio**.
-3. Queda a pantalla completa, con icono propio.
+## Install on iPhone
+
+1. Open the demo in **Safari** (not Chrome).
+2. Share → **Add to Home Screen**.
+3. It launches full screen with its own icon.
 
 ## Stack
 
-| Capa | Tecnología |
+| Layer | Tech |
 | --- | --- |
-| Cliente | HTML, CSS y JavaScript (sin bundler) |
+| Client | HTML, CSS, and JavaScript (no bundler) |
+| i18n | `i18n.js` (`es` default, `en`) |
 | PWA | `manifest.webmanifest` + service worker |
 | Hosting | [Vercel](https://vercel.com) |
-| Ranking | Función `/api/scores` + [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) |
+| Leaderboard | `/api/scores` + [Vercel Blob](https://vercel.com/docs/storage/vercel-blob) |
 
-La partida en curso se guarda en `localStorage`. El ranking vive en Blob para que PC e iPhone vean la misma tabla.
+The in-progress board is stored in `localStorage`. The leaderboard lives in Blob so every device sees the same table.
 
-## Desarrollo local
+## Local development
 
-Requisitos: Python 3 (servidor estático) o cualquier static server. El ranking remoto solo funciona desplegado en Vercel, con `BLOB_READ_WRITE_TOKEN`.
+Needs Python 3 (or any static server). The remote leaderboard only works on Vercel with `BLOB_READ_WRITE_TOKEN`.
 
 ```bash
 python server.py
 ```
 
-Queda en [http://127.0.0.1:2048](http://127.0.0.1:2048).
+Serves [http://127.0.0.1:2048](http://127.0.0.1:2048).
 
-En Windows también se puede usar `Iniciar 2048.bat`.
+On Windows you can also run `Iniciar 2048.bat`.
 
 ## Deploy
 
-El proyecto está listo para Vercel. Hace falta un Blob Store vinculado al proyecto (la variable `BLOB_READ_WRITE_TOKEN` la inyecta Vercel al conectar el store).
+The repo is ready for Vercel. Connect a Blob store to the project so Vercel injects `BLOB_READ_WRITE_TOKEN`.
 
 ```bash
 npx vercel --prod
 ```
 
-## Estructura
+## Project layout
 
 ```
-├── index.html              UI
-├── styles.css              Tema y layout
-├── game.js                 Lógica, input, persistencia local
-├── sw.js                   Cache de la PWA
+├── index.html
+├── styles.css
+├── game.js
+├── i18n.js
+├── sw.js
 ├── manifest.webmanifest
-├── api/scores.js           GET/POST del top 10
-├── icons/                  180 / 192 / 512
-├── server.py               Servidor local
+├── api/scores.js
+├── icons/
+├── server.py
 └── vercel.json
 ```
 
-## Licencia
+## License
 
-Código de este cliente: uso libre en el repo. El juego 2048 original es de [Gabriele Cirulli](https://github.com/gabrielecirulli/2048) (MIT). Esta versión no es el cliente oficial: reimplementa las reglas y una interfaz propia.
+This client is available in this repository. The original 2048 game is by [Gabriele Cirulli](https://github.com/gabrielecirulli/2048) (MIT). This is not the official client; it reimplements the rules with its own UI.

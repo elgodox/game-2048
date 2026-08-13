@@ -25,7 +25,7 @@ let keepPlaying = false;
 let over = false;
 let busy = false;
 let history = null;
-let settings = { sound: true, theme: "dark" };
+let settings = { sound: true, theme: "dark", lang: "es" };
 let ranks = [];
 let playerName = "";
 let savedThisGame = false;
@@ -152,15 +152,52 @@ function cleanName(raw) {
   return String(raw || "").replace(/\s+/g, " ").trim().slice(0, 16);
 }
 
+function t(key, vars) {
+  const pack = I18N[settings.lang] || I18N.es;
+  let s = pack[key] ?? I18N.es[key] ?? key;
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, String(v));
+  }
+  return s;
+}
+
+function applyLang() {
+  const lang = settings.lang === "en" ? "en" : "es";
+  settings.lang = lang;
+  document.documentElement.lang = lang === "en" ? "en" : "es";
+  document.querySelector('meta[name="description"]')?.setAttribute("content", t("metaDesc"));
+  document.querySelectorAll("[data-i18n]").forEach((el) => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  const tagline = document.getElementById("tagline");
+  if (tagline) {
+    tagline.innerHTML = "";
+    const parts = t("tagline", { tile: "\u0000" }).split("\u0000");
+    tagline.append(parts[0] || "");
+    const em = document.createElement("em");
+    em.textContent = "2048";
+    tagline.append(em);
+    tagline.append(parts[1] || "");
+  }
+  document.querySelectorAll("[data-set-lang]").forEach((btn) => {
+    btn.setAttribute("aria-pressed", String(btn.dataset.setLang === lang));
+  });
+  paintName();
+}
+
 function paintName() {
   const chip = document.getElementById("btn-name");
-  if (chip) chip.textContent = playerName || "Anónimo";
+  if (chip) chip.textContent = playerName || t("anonymous");
 }
 
 function load() {
   try {
     const raw = JSON.parse(localStorage.getItem(STORE) || "{}");
-    settings = { sound: raw.settings?.sound !== false, theme: raw.settings?.theme || "dark" };
+    settings = {
+      sound: raw.settings?.sound !== false,
+      theme: raw.settings?.theme || "dark",
+      lang: raw.settings?.lang === "en" ? "en" : "es",
+    };
     best = Number(raw.best) || 0;
     ranks = Array.isArray(raw.ranks) ? raw.ranks : [];
     playerName = cleanName(raw.playerName);
@@ -378,24 +415,30 @@ function switchBtn(on) {
   return `<button type="button" class="switch" role="switch" aria-checked="${on}"><i></i></button>`;
 }
 
+function setLang(lang) {
+  settings.lang = lang === "en" ? "en" : "es";
+  applyLang();
+  persist();
+}
+
 function showMenu() {
   openOverlay(
-    "Menú",
+    t("menu"),
     `
-      <div class="switch-row"><span>Sonido</span>${switchBtn(settings.sound)}</div>
-      <div class="switch-row"><span>Modo oscuro</span>${switchBtn(settings.theme !== "light")}</div>
+      <div class="switch-row"><span>${esc(t("sound"))}</span>${switchBtn(settings.sound)}</div>
+      <div class="switch-row"><span>${esc(t("darkMode"))}</span>${switchBtn(settings.theme !== "light")}</div>
       <div class="field">
-        <label for="menu-name">Tu nombre</label>
-        <input id="menu-name" maxlength="16" autocomplete="nickname" value="${esc(playerName)}" placeholder="Alan" />
+        <label for="menu-name">${esc(t("yourName"))}</label>
+        <input id="menu-name" maxlength="16" autocomplete="nickname" value="${esc(playerName)}" placeholder="${esc(t("namePlaceholder"))}" />
       </div>
-      <p style="margin-top:14px">Deslizá, usá las flechas o WASD. La partida se guarda sola si salís a mitad. El ranking guarda los 10 mejores con nombre.</p>
+      <p style="margin-top:14px">${esc(t("menuHelp"))}</p>
     `,
     [
-      { label: "Nueva partida", onClick: () => confirmNew() },
-      { label: "Deshacer", kind: "soft", onClick: () => { closeOverlay(); undo(); } },
-      { label: "Cómo jugar", kind: "soft", onClick: showHelp },
-      { label: "Instalar en el iPhone", kind: "soft", onClick: showInstall },
-      { label: "Cerrar", kind: "ghost", onClick: closeOverlay },
+      { label: t("newGame"), onClick: () => confirmNew() },
+      { label: t("undo"), kind: "soft", onClick: () => { closeOverlay(); undo(); } },
+      { label: t("howToPlay"), kind: "soft", onClick: showHelp },
+      { label: t("installIphone"), kind: "soft", onClick: showInstall },
+      { label: t("close"), kind: "ghost", onClick: closeOverlay },
     ]
   );
   const switches = els.modalBody.querySelectorAll(".switch");
@@ -421,14 +464,14 @@ function showMenu() {
 
 function showHelp() {
   openOverlay(
-    "Cómo jugar",
+    t("helpTitle"),
     `
-      <p>Deslizá el tablero en cualquier dirección. Todas las fichas se mueven hasta chocar.</p>
-      <p>Si dos fichas con el <strong>mismo número</strong> se tocan, se fusionan en una sola del doble. Esa fusión suma puntos.</p>
-      <p>Después de cada jugada aparece un <strong>2</strong> (casi siempre) o un <strong>4</strong>.</p>
-      <p>El objetivo es crear la ficha <strong>2048</strong>. Después podés seguir por 4096, 8192…</p>
+      <p>${esc(t("help1"))}</p>
+      <p>${esc(t("help2"))}</p>
+      <p>${esc(t("help3"))}</p>
+      <p>${esc(t("help4"))}</p>
     `,
-    [{ label: "Listo", onClick: closeOverlay }]
+    [{ label: t("done"), onClick: closeOverlay }]
   );
 }
 
@@ -437,21 +480,21 @@ function showInstall() {
     window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const body = standalone
-    ? "<p>Ya estás en la app. Quedó instalada en el inicio.</p>"
+    ? `<p>${esc(t("installDone"))}</p>`
     : ios
       ? `
         <ol>
-          <li>Abrila en <strong>Safari</strong> (no Chrome).</li>
-          <li>Tocá el botón <strong>Compartir</strong> (el cuadrado con la flecha).</li>
-          <li>Elegí <strong>Agregar a inicio</strong>.</li>
-          <li>Confirmá. Queda como app, a pantalla completa y modo oscuro.</li>
+          <li>${esc(t("installIos1"))}</li>
+          <li>${esc(t("installIos2"))}</li>
+          <li>${esc(t("installIos3"))}</li>
+          <li>${esc(t("installIos4"))}</li>
         </ol>
       `
       : `
-        <p>En el iPhone: abrí esta misma URL en Safari y usá Compartir → Agregar a inicio.</p>
-        <p>En Android / escritorio, el navegador puede ofrecer “Instalar app”.</p>
+        <p>${esc(t("installOther1"))}</p>
+        <p>${esc(t("installOther2"))}</p>
       `;
-  openOverlay("Instalar", body, [{ label: "Listo", onClick: closeOverlay }]);
+  openOverlay(t("installTitle"), body, [{ label: t("done"), onClick: closeOverlay }]);
 }
 
 function showRanks() {
@@ -460,19 +503,19 @@ function showRanks() {
 
 function rankRows(list) {
   if (!list.length) {
-    return "<p>Todavía no hay partidas en el top 10. Cuando se termine una, entra acá con el nombre.</p>";
+    return `<p>${esc(t("ranksEmpty"))}</p>`;
   }
   return `<ol class="rank-list">${list
     .map(
       (r, i) =>
-        `<li><span class="n">${i + 1}</span><span><span class="who">${esc(r.name || "Anónimo")}</span><span class="sub">${r.tile} · ${esc(r.date || "")}</span></span><span class="pts">${r.score}</span></li>`
+        `<li><span class="n">${i + 1}</span><span><span class="who">${esc(r.name || t("anonymous"))}</span><span class="sub">${r.tile} · ${esc(r.date || "")}</span></span><span class="pts">${r.score}</span></li>`
     )
     .join("")}</ol>`;
 }
 
 function renderRanks() {
-  openOverlay("Ranking", rankRows(ranks), [
-    { label: "Cerrar", kind: "ghost", onClick: closeOverlay },
+  openOverlay(t("ranking"), rankRows(ranks), [
+    { label: t("close"), kind: "ghost", onClick: closeOverlay },
   ]);
 }
 
@@ -496,19 +539,19 @@ function confirmNew() {
     newGame();
     return;
   }
-  openOverlay("¿Nueva partida?", "<p>Se pierde el tablero actual. El mejor puntaje se queda.</p>", [
-    { label: "Sí, reiniciar", onClick: () => { closeOverlay(); newGame(); } },
-    { label: "Cancelar", kind: "ghost", onClick: closeOverlay },
+  openOverlay(t("confirmNewTitle"), `<p>${esc(t("confirmNewBody"))}</p>`, [
+    { label: t("confirmRestart"), onClick: () => { closeOverlay(); newGame(); } },
+    { label: t("cancel"), kind: "ghost", onClick: closeOverlay },
   ]);
 }
 
 function showWin() {
   openOverlay(
-    "¡2048!",
-    `<p>Llegaste a la ficha. Puntaje: <strong>${score}</strong>.</p><p>Podés seguir y cazar el 4096, o arrancar de nuevo.</p>`,
+    t("winTitle"),
+    `<p>${esc(t("winBody", { score }))}</p>`,
     [
-      { label: "Seguir jugando", onClick: () => { keepPlaying = true; persist(); closeOverlay(); } },
-      { label: "Nueva partida", kind: "soft", onClick: () => askSaveThen(() => { closeOverlay(); newGame(); }) },
+      { label: t("keepPlaying"), onClick: () => { keepPlaying = true; persist(); closeOverlay(); } },
+      { label: t("newGame"), kind: "soft", onClick: () => askSaveThen(() => { closeOverlay(); newGame(); }) },
     ]
   );
   sfx("win");
@@ -517,11 +560,11 @@ function showWin() {
 function showLose() {
   askSaveThen(() => {
     openOverlay(
-      "Se terminó",
-      `<p>No quedan movimientos. Puntaje: <strong>${score}</strong>. Mejor ficha: <strong>${maxTile(board)}</strong>.</p>`,
+      t("gameOver"),
+      `<p>${esc(t("gameOverBody", { score, tile: maxTile(board) }))}</p>`,
       [
-        { label: "Nueva partida", onClick: () => { closeOverlay(); newGame(); } },
-        { label: "Ver ranking", kind: "soft", onClick: showRanks },
+        { label: t("newGame"), onClick: () => { closeOverlay(); newGame(); } },
+        { label: t("viewRanking"), kind: "soft", onClick: showRanks },
       ]
     );
   });
@@ -534,25 +577,25 @@ function askSaveThen(done) {
     return;
   }
   openOverlay(
-    "Guardar puntaje",
+    t("saveScore"),
     `
-      <p>Puntaje: <strong>${score}</strong> · ficha ${maxTile(board)}</p>
+      <p>${esc(t("saveScoreBody", { score, tile: maxTile(board) }))}</p>
       <div class="field">
-        <label for="save-name">Nombre para el ranking</label>
-        <input id="save-name" maxlength="16" autocomplete="nickname" value="${esc(playerName)}" placeholder="Tu nombre" />
+        <label for="save-name">${esc(t("rankName"))}</label>
+        <input id="save-name" maxlength="16" autocomplete="nickname" value="${esc(playerName)}" placeholder="${esc(t("namePlaceholder"))}" />
       </div>
     `,
     [
       {
-        label: "Guardar en el top 10",
+        label: t("saveTop10"),
         onClick: () => {
           const input = document.getElementById("save-name");
-          playerName = cleanName(input?.value) || "Anónimo";
+          playerName = cleanName(input?.value) || t("anonymous");
           paintName();
           recordRank().then(done);
         },
       },
-      { label: "No guardar", kind: "ghost", onClick: done },
+      { label: t("skipSave"), kind: "ghost", onClick: done },
     ]
   );
   setTimeout(() => document.getElementById("save-name")?.focus(), 50);
@@ -563,7 +606,7 @@ async function recordRank() {
   savedThisGame = true;
   const now = new Date();
   const entry = {
-    name: playerName || "Anónimo",
+    name: playerName || t("anonymous"),
     score,
     tile: maxTile(board),
     date: now.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" }),
@@ -733,6 +776,9 @@ window.addEventListener("pointerup", (e) => {
 document.getElementById("btn-menu").addEventListener("click", showMenu);
 document.getElementById("btn-board").addEventListener("click", showRanks);
 document.getElementById("btn-name")?.addEventListener("click", showMenu);
+document.querySelectorAll("[data-set-lang]").forEach((btn) => {
+  btn.addEventListener("click", () => setLang(btn.dataset.setLang));
+});
 els.overlay.addEventListener("click", (e) => {
   if (e.target === els.overlay && !over && !(won && !keepPlaying)) closeOverlay();
 });
@@ -749,6 +795,7 @@ if ("serviceWorker" in navigator) {
 buildGrid();
 load();
 applyTheme();
+applyLang();
 renderStatic();
 paintHud();
 refreshRanks();

@@ -1,9 +1,10 @@
-const CACHE = "2048-nocturne-v2";
+const CACHE = "2048-nocturne-v3";
 const ASSETS = [
   "/",
   "/index.html",
   "/styles.css",
   "/game.js",
+  "/i18n.js",
   "/manifest.webmanifest",
   "/icons/icon-180.png",
   "/icons/icon-192.png",
