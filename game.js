@@ -3,6 +3,92 @@ const WIN = 2048;
 const STORE = "nocturne-2048-v1";
 const MOVE_MS = 140;
 
+const THEMES = [
+  { id: "nocturne", color: "#100e0c", a: "#100e0c", b: "#e3b341" },
+  { id: "classic", color: "#faf8ef", a: "#faf8ef", b: "#edc22e" },
+  { id: "cyberpunk", color: "#05040c", a: "#ff2bd6", b: "#00f0ff" },
+  { id: "jungle", color: "#0d1a0c", a: "#2a3d1f", b: "#c6e05a" },
+  { id: "tetris", color: "#0a0e1a", a: "#3dbbff", b: "#ef4141" },
+  { id: "ocean", color: "#04161d", a: "#04161d", b: "#3ad0e8" },
+  { id: "candy", color: "#fff3f8", a: "#fff3f8", b: "#ff6b9d" },
+  { id: "sunset", color: "#1a0d14", a: "#1a0d14", b: "#ff6b35" },
+];
+
+const THEME_PAINT = {
+  nocturne: {
+    board: "#241f18", cell: "#352e24", ink: "#f6edd8",
+    tiles: {
+      2: ["#eee4d6", "#6b5b4a"], 4: ["#eee0c4", "#6b5b4a"], 8: ["#f2b179", "#fff7ef"],
+      16: ["#f59563", "#fff7ef"], 32: ["#f67c5f", "#fff7ef"], 64: ["#f65e3b", "#fff7ef"],
+      128: ["#edcf72", "#fffdf4"], 256: ["#edcc61", "#fffdf4"], 512: ["#edc850", "#fffdf4"],
+      1024: ["#edc53f", "#3a2a08"], 2048: ["#edc22e", "#3a2a08"], big: ["#3c3a32", "#f4e7b0"],
+    },
+  },
+  classic: {
+    board: "#bbada0", cell: "#cdc1b4", ink: "#776e65",
+    tiles: {
+      2: ["#eee4da", "#776e65"], 4: ["#ede0c8", "#776e65"], 8: ["#f2b179", "#f9f6f2"],
+      16: ["#f59563", "#f9f6f2"], 32: ["#f67c5f", "#f9f6f2"], 64: ["#f65e3b", "#f9f6f2"],
+      128: ["#edcf72", "#f9f6f2"], 256: ["#edcc61", "#f9f6f2"], 512: ["#edc850", "#f9f6f2"],
+      1024: ["#edc53f", "#776e65"], 2048: ["#edc22e", "#776e65"], big: ["#3c3a32", "#f9f6f2"],
+    },
+  },
+  cyberpunk: {
+    board: "#0a0816", cell: "#1a1630", ink: "#f4f0ff",
+    tiles: {
+      2: ["#1d1638", "#c9b8ff"], 4: ["#2a1850", "#e0d4ff"], 8: ["#5b1d7a", "#ffe6ff"],
+      16: ["#8a1a9a", "#fff0ff"], 32: ["#c41a9a", "#fff5ff"], 64: ["#ff2bd6", "#1a0014"],
+      128: ["#00c2d4", "#021318"], 256: ["#00e5ff", "#021318"], 512: ["#7af7ff", "#021318"],
+      1024: ["#ffe14a", "#2a1f00"], 2048: ["#fff36a", "#2a1f00"], big: ["#2b1648", "#ff7ae8"],
+    },
+  },
+  jungle: {
+    board: "#2a3d1f", cell: "#3d5428", ink: "#f3f6d8",
+    tiles: {
+      2: ["#dce8b4", "#3a4a20"], 4: ["#c5dc7a", "#2f3e16"], 8: ["#8fbf3f", "#f4ffd8"],
+      16: ["#5a9a32", "#f4ffd8"], 32: ["#e0b03a", "#2a2008"], 64: ["#e07a2a", "#fff6ea"],
+      128: ["#d94a2a", "#fff6ea"], 256: ["#c43a4a", "#fff6ea"], 512: ["#7a3aa0", "#fff6ea"],
+      1024: ["#f0e06a", "#2a2608"], 2048: ["#ffe97a", "#2a2608"], big: ["#1c2e14", "#e6d35a"],
+    },
+  },
+  tetris: {
+    board: "#111628", cell: "#1c2440", ink: "#e8ecff",
+    tiles: {
+      2: ["#2dd4e0", "#042428"], 4: ["#f7d51d", "#2a2200"], 8: ["#b44adf", "#fff8ff"],
+      16: ["#3cc85a", "#04240c"], 32: ["#ef4141", "#fff8f2"], 64: ["#f08a24", "#2a1400"],
+      128: ["#3d7bff", "#f4f8ff"], 256: ["#ff5ad6", "#2a0020"], 512: ["#7af0a0", "#04240c"],
+      1024: ["#ffe14a", "#2a2200"], 2048: ["#ffffff", "#111628"], big: ["#080b16", "#f7d51d"],
+    },
+  },
+  ocean: {
+    board: "#0c3340", cell: "#144556", ink: "#e7fbff",
+    tiles: {
+      2: ["#d8f6ff", "#164656"], 4: ["#9fe6f5", "#164656"], 8: ["#3ad0e8", "#042028"],
+      16: ["#1aa8c4", "#e7fbff"], 32: ["#2a9d8f", "#e7fbff"], 64: ["#1d6f8a", "#e7fbff"],
+      128: ["#f4a261", "#2a1608"], 256: ["#e76f51", "#fff6ea"], 512: ["#e9c46a", "#2a2208"],
+      1024: ["#ffe08a", "#2a2208"], 2048: ["#fff3b0", "#2a2208"], big: ["#062028", "#7af0ff"],
+    },
+  },
+  candy: {
+    board: "#ffd0e3", cell: "#ffc1d9", ink: "#5b2a44",
+    tiles: {
+      2: ["#fff7fb", "#8a4064"], 4: ["#ffe0ee", "#8a4064"], 8: ["#ffb3d0", "#5b2a44"],
+      16: ["#ff8fab", "#fff8fb"], 32: ["#ff6b9d", "#fff8fb"], 64: ["#f25c8a", "#fff8fb"],
+      128: ["#c084fc", "#fff8fb"], 256: ["#93c5fd", "#1e3a5f"], 512: ["#86efac", "#14532d"],
+      1024: ["#fde68a", "#5b3a08"], 2048: ["#fbcfe8", "#5b2a44"], big: ["#5b2a44", "#ffe0ee"],
+    },
+  },
+  sunset: {
+    board: "#3a1d22", cell: "#4a2830", ink: "#ffe9d6",
+    tiles: {
+      2: ["#ffe0c4", "#6a3a28"], 4: ["#ffc89a", "#6a3a28"], 8: ["#ff9a62", "#2a1208"],
+      16: ["#ff6b35", "#fff6ea"], 32: ["#e84d3d", "#fff6ea"], 64: ["#c23a54", "#fff6ea"],
+      128: ["#8b2f6a", "#ffe9d6"], 256: ["#5c2d7a", "#ffe9d6"], 512: ["#ffb347", "#2a1608"],
+      1024: ["#ffd27a", "#2a1608"], 2048: ["#ffe08a", "#2a1608"], big: ["#241018", "#ffb347"],
+    },
+  },
+};
+
 const els = {
   grid: document.getElementById("grid"),
   tiles: document.getElementById("tiles"),
@@ -25,10 +111,11 @@ let keepPlaying = false;
 let over = false;
 let busy = false;
 let history = null;
-let settings = { sound: true, theme: "dark", lang: "es" };
+let settings = { sound: true, theme: "nocturne", lang: "es" };
 let ranks = [];
 let playerName = "";
 let savedThisGame = false;
+let shots = { win: null, lose: null };
 
 function emptyBoard() {
   return Array.from({ length: SIZE }, () => Array(SIZE).fill(null));
@@ -138,6 +225,17 @@ function maxTile(b) {
   return m;
 }
 
+function slimValues(b) {
+  return b.map((row) => row.map((t) => (t ? t.value : 0)));
+}
+
+function normalizeTheme(raw) {
+  if (raw === "light") return "classic";
+  if (raw === "dark") return "nocturne";
+  if (THEMES.some((th) => th.id === raw)) return raw;
+  return "nocturne";
+}
+
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (c) => ({
     "&": "&amp;",
@@ -183,6 +281,7 @@ function applyLang() {
     btn.setAttribute("aria-pressed", String(btn.dataset.setLang === lang));
   });
   paintName();
+  paintThemeStrip();
 }
 
 function paintName() {
@@ -195,15 +294,19 @@ function load() {
     const raw = JSON.parse(localStorage.getItem(STORE) || "{}");
     settings = {
       sound: raw.settings?.sound !== false,
-      theme: raw.settings?.theme || "dark",
+      theme: normalizeTheme(raw.settings?.theme),
       lang: raw.settings?.lang === "en" ? "en" : "es",
     };
     best = Number(raw.best) || 0;
     ranks = Array.isArray(raw.ranks) ? raw.ranks : [];
     playerName = cleanName(raw.playerName);
+    shots = {
+      win: sanitizeShot(raw.shots?.win),
+      lose: sanitizeShot(raw.shots?.lose),
+    };
     if (raw.game?.board && !raw.game.over) {
       board = raw.game.board.map((row) =>
-        row.map((t) => (t ? { id: nextId++, value: t.value } : null))
+        row.map((tile) => (tile ? { id: nextId++, value: tile.value } : null))
       );
       score = Number(raw.game.score) || 0;
       won = !!raw.game.won;
@@ -225,8 +328,33 @@ function load() {
   }
 }
 
+function sanitizeShot(shot) {
+  if (!shot || !Array.isArray(shot.values) || shot.values.length !== SIZE) return null;
+  const values = shot.values.map((row) => {
+    if (!Array.isArray(row) || row.length !== SIZE) return [0, 0, 0, 0];
+    return row.map((n) => {
+      const v = Number(n) || 0;
+      return v > 0 ? v : 0;
+    });
+  });
+  return {
+    kind: shot.kind === "win" ? "win" : "lose",
+    values,
+    score: Number(shot.score) || 0,
+    tile: Number(shot.tile) || maxOfValues(values),
+    theme: normalizeTheme(shot.theme),
+    at: shot.at || "",
+  };
+}
+
+function maxOfValues(values) {
+  let m = 0;
+  for (const row of values) for (const n of row) if (n > m) m = n;
+  return m;
+}
+
 function persist() {
-  const slim = board.map((row) => row.map((t) => (t ? { value: t.value } : null)));
+  const slim = board.map((row) => row.map((tile) => (tile ? { value: tile.value } : null)));
   localStorage.setItem(
     STORE,
     JSON.stringify({
@@ -234,17 +362,175 @@ function persist() {
       settings,
       ranks,
       playerName,
+      shots,
       game: over ? null : { board: slim, score, won, keepPlaying, over: false },
     })
   );
 }
 
 function applyTheme() {
-  document.documentElement.dataset.theme = settings.theme === "light" ? "light" : "dark";
-  document.querySelector('meta[name="theme-color"]')?.setAttribute(
-    "content",
-    settings.theme === "light" ? "#f4efe4" : "#100e0c"
-  );
+  const id = normalizeTheme(settings.theme);
+  settings.theme = id;
+  document.documentElement.dataset.theme = id;
+  const meta = THEMES.find((th) => th.id === id);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", meta?.color || "#100e0c");
+  paintThemeStrip();
+}
+
+function setTheme(id) {
+  settings.theme = normalizeTheme(id);
+  applyTheme();
+  persist();
+}
+
+function paintThemeStrip() {
+  const strip = document.getElementById("theme-strip");
+  if (!strip) return;
+  strip.innerHTML = "";
+  for (const th of THEMES) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "theme-dot";
+    btn.style.setProperty("--dot-a", th.a);
+    btn.style.setProperty("--dot-b", th.b);
+    btn.title = t(`theme${th.id[0].toUpperCase()}${th.id.slice(1)}`);
+    btn.setAttribute("role", "radio");
+    btn.setAttribute("aria-checked", String(settings.theme === th.id));
+    btn.setAttribute("aria-label", btn.title);
+    btn.addEventListener("click", () => setTheme(th.id));
+    strip.appendChild(btn);
+  }
+}
+
+function themePickerHtml() {
+  return `<div class="theme-grid">${THEMES.map((th) => {
+    const label = t(`theme${th.id[0].toUpperCase()}${th.id.slice(1)}`);
+    return `<button type="button" class="theme-card" data-theme-id="${th.id}" aria-pressed="${settings.theme === th.id}" style="--dot-a:${th.a};--dot-b:${th.b}"><span class="sw"></span><span class="nm">${esc(label)}</span></button>`;
+  }).join("")}</div>`;
+}
+
+function bindThemePicker(root) {
+  root.querySelectorAll("[data-theme-id]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setTheme(btn.dataset.themeId);
+      root.querySelectorAll("[data-theme-id]").forEach((el) => {
+        el.setAttribute("aria-pressed", String(el.dataset.themeId === settings.theme));
+      });
+    });
+  });
+}
+
+/* ── snapshots ── */
+function captureShot(kind) {
+  const shot = {
+    kind,
+    values: slimValues(board),
+    score,
+    tile: maxTile(board),
+    theme: settings.theme,
+    at: new Date().toISOString(),
+  };
+  shots[kind] = shot;
+  persist();
+  return shot;
+}
+
+function tilePaint(themeId, value) {
+  const pack = THEME_PAINT[normalizeTheme(themeId)] || THEME_PAINT.nocturne;
+  if (value >= 4096) return pack.tiles.big;
+  return pack.tiles[value] || pack.tiles.big;
+}
+
+function drawShotPng(shot, size = 360) {
+  const paint = THEME_PAINT[normalizeTheme(shot.theme)] || THEME_PAINT.nocturne;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  const pad = Math.round(size * 0.045);
+  const gap = Math.round(size * 0.018);
+  const cell = (size - pad * 2 - gap * 3) / 4;
+  const radius = Math.max(3, cell * 0.16);
+  ctx.fillStyle = paint.board;
+  roundRect(ctx, 0, 0, size, size, pad + 4);
+  ctx.fill();
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const x = pad + c * (cell + gap);
+      const y = pad + r * (cell + gap);
+      const value = shot.values[r][c];
+      if (!value) {
+        ctx.fillStyle = paint.cell;
+        roundRect(ctx, x, y, cell, cell, radius);
+        ctx.fill();
+        continue;
+      }
+      const [bg, ink] = tilePaint(shot.theme, value);
+      ctx.fillStyle = bg;
+      roundRect(ctx, x, y, cell, cell, radius);
+      ctx.fill();
+      ctx.fillStyle = ink;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      const digits = String(value).length;
+      ctx.font = `700 ${Math.round(cell * (digits > 3 ? 0.32 : digits > 2 ? 0.38 : 0.46))}px Sora, Segoe UI, sans-serif`;
+      ctx.fillText(String(value), x + cell / 2, y + cell / 2 + 1);
+    }
+  }
+  return canvas.toDataURL("image/png");
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const rad = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rad, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rad);
+  ctx.arcTo(x + w, y + h, x, y + h, rad);
+  ctx.arcTo(x, y + h, x, y, rad);
+  ctx.arcTo(x, y, x + w, y, rad);
+  ctx.closePath();
+}
+
+function shotBoardHtml(shot) {
+  const cells = shot.values
+    .flat()
+    .map((v) => (v ? `<div class="mini-tile tile-${v}">${v}</div>` : `<div class="mini-cell"></div>`))
+    .join("");
+  return `<div class="shot-board">${cells}</div>`;
+}
+
+function shotCardHtml(kind) {
+  const shot = shots[kind];
+  const title = kind === "win" ? t("shotWin") : t("shotLose");
+  if (!shot) {
+    return `<section class="shot"><h3>${esc(title)}</h3><div class="shot-empty">${esc(kind === "win" ? t("noShotWin") : t("noShotLose"))}</div></section>`;
+  }
+  const date = shot.at
+    ? new Date(shot.at).toLocaleString(settings.lang === "en" ? "en-GB" : "es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "";
+  const png = drawShotPng(shot);
+  return `
+    <section class="shot" data-theme="${esc(shot.theme)}">
+      <h3>${esc(title)}</h3>
+      ${shotBoardHtml(shot)}
+      <img class="shot-photo" alt="${esc(title)}" src="${png}" />
+      <p class="cap">${esc(t(kind === "win" ? "shotWinCap" : "shotLoseCap", { score: shot.score, tile: shot.tile }))}${date ? ` · ${esc(date)}` : ""}</p>
+    </section>
+  `;
+}
+
+function downloadShot(kind) {
+  const shot = shots[kind];
+  if (!shot) return;
+  const a = document.createElement("a");
+  a.href = drawShotPng(shot, 512);
+  a.download = `2048-${kind}-${shot.score}.png`;
+  a.click();
 }
 
 /* ── audio / haptics ── */
@@ -313,8 +599,8 @@ function renderStatic() {
   els.tiles.innerHTML = "";
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
-      const t = board[r][c];
-      if (t) els.tiles.appendChild(tileEl(t.value, r, c));
+      const tile = board[r][c];
+      if (tile) els.tiles.appendChild(tileEl(tile.value, r, c));
     }
   }
   paintHud();
@@ -339,8 +625,8 @@ function renderMove(prev, next, spawned) {
   const prevPos = new Map();
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
-      const t = prev[r][c];
-      if (t) prevPos.set(t.id, { r, c });
+      const tile = prev[r][c];
+      if (tile) prevPos.set(tile.id, { r, c });
     }
   }
 
@@ -349,25 +635,25 @@ function renderMove(prev, next, spawned) {
 
   for (let r = 0; r < SIZE; r++) {
     for (let c = 0; c < SIZE; c++) {
-      const t = next[r][c];
-      if (!t) continue;
-      if (t.from) {
-        for (const src of t.from) {
+      const tile = next[r][c];
+      if (!tile) continue;
+      if (tile.from) {
+        for (const src of tile.from) {
           const p = prevPos.get(src.id) || { r, c };
           const ghost = tileEl(src.value, p.r, p.c, "ghost");
           els.tiles.appendChild(ghost);
           movers.push({ el: ghost, r, c });
         }
-        const merged = tileEl(t.value, r, c, "hidden");
+        const merged = tileEl(tile.value, r, c, "hidden");
         els.tiles.appendChild(merged);
         movers.push({ el: merged, r, c, pop: "merged" });
-      } else if (spawned && t.id === spawned.id) {
-        const fresh = tileEl(t.value, r, c, "hidden");
+      } else if (spawned && tile.id === spawned.id) {
+        const fresh = tileEl(tile.value, r, c, "hidden");
         els.tiles.appendChild(fresh);
         movers.push({ el: fresh, r, c, pop: "new" });
       } else {
-        const p = prevPos.get(t.id) || { r, c };
-        const el = tileEl(t.value, p.r, p.c);
+        const p = prevPos.get(tile.id) || { r, c };
+        const el = tileEl(tile.value, p.r, p.c);
         els.tiles.appendChild(el);
         movers.push({ el, r, c });
       }
@@ -426,7 +712,8 @@ function showMenu() {
     t("menu"),
     `
       <div class="switch-row"><span>${esc(t("sound"))}</span>${switchBtn(settings.sound)}</div>
-      <div class="switch-row"><span>${esc(t("darkMode"))}</span>${switchBtn(settings.theme !== "light")}</div>
+      <p style="margin:12px 0 0">${esc(t("themeHelp"))}</p>
+      ${themePickerHtml()}
       <div class="field">
         <label for="menu-name">${esc(t("yourName"))}</label>
         <input id="menu-name" maxlength="16" autocomplete="nickname" value="${esc(playerName)}" placeholder="${esc(t("namePlaceholder"))}" />
@@ -436,6 +723,7 @@ function showMenu() {
     [
       { label: t("newGame"), onClick: () => confirmNew() },
       { label: t("undo"), kind: "soft", onClick: () => { closeOverlay(); undo(); } },
+      { label: t("viewShots"), kind: "soft", onClick: showShots },
       { label: t("howToPlay"), kind: "soft", onClick: showHelp },
       { label: t("installIphone"), kind: "soft", onClick: showInstall },
       { label: t("close"), kind: "ghost", onClick: closeOverlay },
@@ -448,18 +736,28 @@ function showMenu() {
     persist();
     if (settings.sound) sfx("merge", 8);
   });
-  switches[1]?.addEventListener("click", () => {
-    settings.theme = settings.theme === "light" ? "dark" : "light";
-    switches[1].setAttribute("aria-checked", String(settings.theme !== "light"));
-    applyTheme();
-    persist();
-  });
+  bindThemePicker(els.modalBody);
   const nameInput = document.getElementById("menu-name");
   nameInput?.addEventListener("input", () => {
     playerName = cleanName(nameInput.value);
     paintName();
     persist();
   });
+}
+
+function showShots() {
+  const actions = [{ label: t("close"), kind: "ghost", onClick: closeOverlay }];
+  if (shots.win) {
+    actions.unshift({ label: `${t("savePhoto")} · ${t("shotWin")}`, kind: "soft", onClick: () => downloadShot("win") });
+  }
+  if (shots.lose) {
+    actions.unshift({ label: `${t("savePhoto")} · ${t("shotLose")}`, kind: "soft", onClick: () => downloadShot("lose") });
+  }
+  openOverlay(
+    t("shotsTitle"),
+    `<div class="shots">${shotCardHtml("win")}${shotCardHtml("lose")}</div>`,
+    actions
+  );
 }
 
 function showHelp() {
@@ -546,11 +844,13 @@ function confirmNew() {
 }
 
 function showWin() {
+  const shot = shots.win;
   openOverlay(
     t("winTitle"),
-    `<p>${esc(t("winBody", { score }))}</p>`,
+    `<p>${esc(t("winBody", { score }))}</p>${shot ? `<div class="shots">${shotCardHtml("win")}</div>` : ""}`,
     [
       { label: t("keepPlaying"), onClick: () => { keepPlaying = true; persist(); closeOverlay(); } },
+      { label: t("savePhoto"), kind: "soft", onClick: () => downloadShot("win") },
       { label: t("newGame"), kind: "soft", onClick: () => askSaveThen(() => { closeOverlay(); newGame(); }) },
     ]
   );
@@ -559,12 +859,15 @@ function showWin() {
 
 function showLose() {
   askSaveThen(() => {
+    const shot = shots.lose;
     openOverlay(
       t("gameOver"),
-      `<p>${esc(t("gameOverBody", { score, tile: maxTile(board) }))}</p>`,
+      `<p>${esc(t("gameOverBody", { score, tile: maxTile(board) }))}</p>${shot ? `<div class="shots">${shotCardHtml("lose")}</div>` : ""}`,
       [
         { label: t("newGame"), onClick: () => { closeOverlay(); newGame(); } },
+        { label: t("savePhoto"), kind: "soft", onClick: () => downloadShot("lose") },
         { label: t("viewRanking"), kind: "soft", onClick: showRanks },
+        { label: t("viewShots"), kind: "ghost", onClick: showShots },
       ]
     );
   });
@@ -679,8 +982,14 @@ function play(dir) {
   if (gained) haptic(gained >= 128 ? 18 : 8);
 
   const hitWin = !won && maxTile(board) >= WIN;
-  if (hitWin) won = true;
-  if (!canMove(board)) over = true;
+  if (hitWin) {
+    won = true;
+    captureShot("win");
+  }
+  if (!canMove(board)) {
+    over = true;
+    captureShot("lose");
+  }
   persist();
 
   setTimeout(() => {
@@ -738,8 +1047,8 @@ document.addEventListener(
   "touchstart",
   (e) => {
     if (e.target.closest(".overlay")) return;
-    const t = e.changedTouches[0];
-    onStart(t.clientX, t.clientY);
+    const touch = e.changedTouches[0];
+    onStart(touch.clientX, touch.clientY);
   },
   { passive: true }
 );
@@ -748,8 +1057,8 @@ document.addEventListener(
   "touchend",
   (e) => {
     if (e.target.closest(".overlay")) return;
-    const t = e.changedTouches[0];
-    onEnd(t.clientX, t.clientY);
+    const touch = e.changedTouches[0];
+    onEnd(touch.clientX, touch.clientY);
   },
   { passive: true }
 );
@@ -791,6 +1100,65 @@ document.addEventListener("visibilitychange", () => {
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("/sw.js").catch(() => {});
 }
+
+function applyBoardValues(values, opts = {}) {
+  board = emptyBoard();
+  nextId = 1;
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const v = Number(values?.[r]?.[c]) || 0;
+      if (v) board[r][c] = { id: nextId++, value: v };
+    }
+  }
+  score = Number(opts.score) || 0;
+  won = !!opts.won;
+  keepPlaying = !!opts.keepPlaying;
+  over = !!opts.over;
+  savedThisGame = false;
+  history = null;
+  renderStatic();
+  persist();
+}
+
+window.Game2048 = {
+  themes: THEMES.map((th) => th.id),
+  setTheme,
+  showShots,
+  showWin,
+  showLose,
+  captureShot,
+  getShots: () => JSON.parse(JSON.stringify(shots)),
+  applyBoardValues,
+  demoWin() {
+    applyBoardValues(
+      [
+        [1024, 1024, 8, 4],
+        [256, 128, 16, 2],
+        [64, 32, 8, 4],
+        [16, 8, 4, 2],
+      ],
+      { score: 20480 }
+    );
+    won = false;
+    keepPlaying = false;
+    over = false;
+    play("left");
+  },
+  demoLose() {
+    applyBoardValues(
+      [
+        [2, 4, 8, 16],
+        [32, 64, 128, 256],
+        [512, 1024, 2, 4],
+        [8, 16, 32, 64],
+      ],
+      { score: 9999, won: true, keepPlaying: true, over: true }
+    );
+    savedThisGame = true;
+    captureShot("lose");
+    showLose();
+  },
+};
 
 buildGrid();
 load();
