@@ -1,6 +1,6 @@
 # 2048
 
-A dark-mode 2048 web client for phone and desktop. It installs as a PWA, resumes unfinished games, and keeps a shared top-10 leaderboard with player names.
+A 2048 web client for phone and desktop. It installs as a PWA, resumes unfinished games, keeps a shared top-10 leaderboard, and can switch visual themes mid-game. Winning and losing boards are saved as visual snapshots you can reopen later.
 
 The UI defaults to **Spanish**. Switch to English with the ES / EN control on the board.
 
@@ -14,7 +14,8 @@ The UI defaults to **Spanish**. Switch to English with the ES / EN control on th
 - Shared top-10 leaderboard with a player name
 - Automatic resume if you close mid-game
 - Installable app (manifest, service worker, Apple icons)
-- Dark theme by default, optional light theme
+- Eight switchable themes (Nocturne, Classic, Cyberpunk, Jungle, Tetris, Ocean, Candy, Sunset)
+- Visual snapshots of the last win and last lose, with a downloadable board photo
 - Spanish and English
 
 ## How to play

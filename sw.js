@@ -1,4 +1,4 @@
-const CACHE = "2048-nocturne-v3";
+const CACHE = "2048-nocturne-v4";
 const ASSETS = [
   "/",
   "/index.html",
